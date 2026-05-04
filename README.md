@@ -68,8 +68,12 @@ Abra [http://localhost:3000](http://localhost:3000).
 ## 6. Deploy (Vercel)
 
 1. Ligar o repo à Vercel.
-2. Definir as mesmas variáveis de ambiente.
-3. Adicionar URL de produção nas Redirect URLs do Supabase (`/auth/callback`).
+2. No painel da Vercel, definir **`NEXT_PUBLIC_SUPABASE_URL`** e **`NEXT_PUBLIC_SUPABASE_ANON_KEY`** (e opcionalmente `NEXT_PUBLIC_SITE_URL` com `https://<teu-project>.vercel.app` ou o domínio final).
+3. Adicionar a URL de produção nas Redirect URLs do Supabase (`https://…/auth/callback`).
+
+O script **`npm run build`** usa **`next build --webpack`**, por omissão do projeto, para builds de produção mais estáveis na Vercel (o Turbopack por vezes falha ao resolver caminhos em repos com árvores de ficheiros atípicas). O comando `npm run dev` pode continuar a usar Turbopack localmente quando aplicável.
+
+Não faças commit de **`apps/`** contendo apenas artefactos (`dist/` de Nest ou similares): aumenta o clone e pode provocar erros estranhos no build. Essa pasta deve estar no `.gitignore` ou removida do repositório com `git rm -r apps` antes do próximo deploy, se já tiver sido enviada.
 
 ## Scripts
 

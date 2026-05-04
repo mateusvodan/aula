@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Pastas geradas ou projetos paralelos não são parte da app Next
+    "apps/**",
+    "**/dist/**",
   ]),
 ]);
 
