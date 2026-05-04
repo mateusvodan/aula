@@ -1,159 +1,85 @@
-# Turborepo starter
+# Funquiz — SaaS de funis de quiz
 
-This Turborepo starter is maintained by the Turborepo core team.
+Aplicação **Next.js 16** (App Router) com **Tailwind v4**, **Shadcn UI**, **Supabase Auth + Postgres**, construtor visual com **React Flow**, páginas públicas em **`/q/[slug]`**, captura de leads e analytics simples.
 
-## Using this example
+## Pré-requisitos
 
-Run the following command:
+- Node.js 18+
+- Conta Supabase ([supabase.com](https://supabase.com/dashboard))
 
-```sh
-npx create-turbo@latest
+## 1. Instalação local
+
+```bash
+npm install
+cp .env.example .env.local
 ```
 
-## What's inside?
+Preencha em `.env.local`:
 
-This Turborepo includes the following packages/apps:
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` — use a chave **anon** em Project API keys (**nunca** `service_role` no frontend).
 
-### Apps and Packages
+Opcional (útil para links absolutos):
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+- `NEXT_PUBLIC_SITE_URL` — exemplo: `http://localhost:3000`
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+Reinicie `npm run dev` depois de criar ou alterar `.env.local` (variáveis `NEXT_PUBLIC_*` são aplicadas ao arranque).
 
-### Utilities
+## 2. Base de dados Supabase
 
-This Turborepo has some additional tools already setup for you:
+1. Crie um projeto no Supabase.
+2. Na raiz deste repo, rode a migração SQL (Dashboard → SQL → New query) com o conteúdo de  
+   [`supabase/migrations/20260504123000_init.sql`](supabase/migrations/20260504123000_init.sql).
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+   Ou use a CLI (`supabase db push`), se já tiver o projeto ligado.
 
-### Build
+3. Configure **Redirect URLs** em Authentication → URL Configuration (ex.:  
+   `http://localhost:3000/auth/callback` e o URL de produção).
 
-To build all apps and packages, run the following command:
+## 3. Desenvolvimento
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo build
+```bash
+npm run dev
 ```
 
-Without global `turbo`, use your package manager:
+Abra [http://localhost:3000](http://localhost:3000).
 
-```sh
-cd my-turborepo
-npx turbo build
-npm dlx turbo build
-npm exec turbo build
+- Landing: `/`
+- Registo/login: `/signup`, `/login`, `/forgot-password`
+- Callback OAuth / magic links: `/auth/callback`
+- Painel (autenticado): `/dashboard`
+- Editor de funil: `/dashboard/funnels/[id]/edit`
+- Analytics: `/dashboard/funnels/[id]/analytics`
+- Quiz público: `/q/[slug]` (requer **publicar** o funil no editor)
+
+## 4. Fluxo rápido
+
+1. Registar utilizador → perfil criado por trigger (`profiles`).
+2. Criar funil ou usar **template** no painel.
+3. Configurar blocos no canvas → **Guardar fluxo**.
+4. **Publicar** o funil para permitir página pública, leads e eventos anon.
+5. Partilhar `https://<teu-domínio>/q/<slug>`.
+
+## 5. Integrações (estrutura)
+
+- **Webhook**: campo no painel de integrações do editor (`settings.webhook_url`) — disparo no servidor ao submeter lead.
+- **WhatsApp / checkout**: `whatsapp_phone`, `checkout_base_url` nos mesmos settings; link de exemplo na página de redirect público (`redirect`).
+
+## 6. Deploy (Vercel)
+
+1. Ligar o repo à Vercel.
+2. Definir as mesmas variáveis de ambiente.
+3. Adicionar URL de produção nas Redirect URLs do Supabase (`/auth/callback`).
+
+## Scripts
+
+```bash
+npm run dev    # servidor de desenvolvimento
+npm run build  # build de produção
+npm run start  # após build
+npm run lint   # ESLint
 ```
 
-You can build a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+## Stack
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo build --filter=docs
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo build --filter=docs
-npm exec turbo build --filter=docs
-npm exec turbo build --filter=docs
-```
-
-### Develop
-
-To develop all apps and packages, run the following command:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo dev
-```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo dev
-npm exec turbo dev
-npm exec turbo dev
-```
-
-You can develop a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo dev --filter=web
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo dev --filter=web
-npm exec turbo dev --filter=web
-npm exec turbo dev --filter=web
-```
-
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo login
-```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo login
-npm exec turbo login
-npm exec turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo link
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo link
-npm exec turbo link
-npm exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.dev/docs/reference/configuration)
-- [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)
+Next.js • TypeScript • Tailwind CSS • Shadcn • Supabase Auth/Postgres • RLS • React Flow • Recharts • Vercel (recomendado)
